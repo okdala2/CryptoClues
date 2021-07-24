@@ -43,16 +43,23 @@ class ViewController: UIViewController {
             switch result {
             case .success(let models):
 
-                self?.viewModels = models.compactMap({
+                self?.viewModels = models.compactMap({ model in
                     //Number Formatter
-                    let price = $0.price_usd ?? 0
+                    let price = model.price_usd ?? 0
                     let formatter = ViewController.numberFormatter
                     let priceString = formatter.string(from: NSNumber(value: price))
                     
+                    let iconURL = URL(string: APICaller.shared.icons.filter({ icon in
+                        icon.asset_id == model.asset_id
+                    }).first?.url ?? "")
+                     
+                    
                     return CryptoTableViewCellViewModel(
-                    name: $0.name ?? "",
-                    symbol: $0.asset_id,
-                    price: priceString ?? "N/A")
+                        
+                    name: model.name ?? "",
+                    symbol: model.asset_id,
+                    price: priceString ?? "N/A",
+                    iconURL: iconURL)
                 })
                 DispatchQueue.main.async {
                     self?.tableView.reloadData()

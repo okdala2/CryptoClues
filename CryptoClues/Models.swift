@@ -15,6 +15,11 @@ struct Crypto: Codable {
     let price_usd: Float?
 }
 
+struct Icons: Codable {
+    let asset_id: String?
+    let url: String?
+}
+
 /*
  "asset_id": "BTC",
      "name": "Bitcoin",
