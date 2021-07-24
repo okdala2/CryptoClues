@@ -19,6 +19,10 @@ class ViewController: UIViewController {
         return tableView
     }()
     
+    private var viewModels = [CryptoTableViewCellViewModel]()
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -27,11 +31,21 @@ class ViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         
-        APICaller.shared.getAllCryptoData { result in
+        APICaller.shared.getAllCryptoData { [weak self] result in
             
             switch result {
             case .success(let models):
-                print(models.count)
+                self?.viewModels = models.compactMap({ CryptoTableViewCellViewModel(
+                    //Number Formatter
+                    
+                    name: $0.name ?? "",
+                    symbol: $0.asset_id,
+                    price:"$1")
+                    
+                })
+                DispatchQueue.main.async {
+                    self?.tableView.reloadData()
+                }
             case .failure(let error):
                 print(error)
             }
@@ -47,12 +61,12 @@ class ViewController: UIViewController {
 extension ViewController: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 10
+        return viewModels.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: CryptoTableViewCell.identifier, for: indexPath) as! CryptoTableViewCell
-        cell.textLabel?.text = "Dummy Data"
+        cell.configure(with: viewModels[indexPath.row])
         return cell
     }
 }
