@@ -21,7 +21,14 @@ class ViewController: UIViewController {
     
     private var viewModels = [CryptoTableViewCellViewModel]()
     
-    
+    static let numberFormatter: NumberFormatter = {
+        let formatter = NumberFormatter()
+        formatter.locale = .current
+        formatter.allowsFloats = true
+        formatter.numberStyle = .currency
+        formatter.formatterBehavior = .default
+        return formatter
+    }()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,13 +42,17 @@ class ViewController: UIViewController {
             
             switch result {
             case .success(let models):
-                self?.viewModels = models.compactMap({ CryptoTableViewCellViewModel(
+
+                self?.viewModels = models.compactMap({
                     //Number Formatter
+                    let price = $0.price_usd ?? 0
+                    let formatter = ViewController.numberFormatter
+                    let priceString = formatter.string(from: NSNumber(value: price))
                     
+                    return CryptoTableViewCellViewModel(
                     name: $0.name ?? "",
                     symbol: $0.asset_id,
-                    price:"$1")
-                    
+                    price: priceString ?? "N/A")
                 })
                 DispatchQueue.main.async {
                     self?.tableView.reloadData()
@@ -68,5 +79,9 @@ extension ViewController: UITableViewDelegate, UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: CryptoTableViewCell.identifier, for: indexPath) as! CryptoTableViewCell
         cell.configure(with: viewModels[indexPath.row])
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 70
     }
 }
