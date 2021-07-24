@@ -7,11 +7,19 @@
 
 import UIKit
 
-struct CryptoTableViewCellViewModel {
+class CryptoTableViewCellViewModel {
     let name: String
     let symbol: String
     let price: String
     let iconURL: URL?
+    var iconData: Data?
+    
+    init(name: String, symbol: String, price: String, iconURL: URL?) {
+        self.name = name
+        self.symbol = symbol
+        self.price = price
+        self.iconURL = iconURL
+    }
 }
 
 class CryptoTableViewCell: UITableViewCell {
@@ -88,15 +96,21 @@ class CryptoTableViewCell: UITableViewCell {
         priceLabel.text = viewModel.price
         symbolLabel.text = viewModel.symbol
         
-        if let url = viewModel.iconURL {
-            let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
-                if let data = data {
-                    DispatchQueue.main.async {
-                        self?.iconImageview.image = UIImage(data: data)
+        if let data = viewModel.iconData {
+            iconImageview.image = UIImage(data: data)
+        } else {
+            if let url = viewModel.iconURL {
+                let task = URLSession.shared.dataTask(with: url) { [weak self] data, _, _ in
+                    if let data = data {
+                        viewModel.iconData = data
+                        
+                        DispatchQueue.main.async {
+                            self?.iconImageview.image = UIImage(data: data)
+                        }
                     }
                 }
+                task.resume()
             }
-            task.resume()
         }
     }
 }
