@@ -44,7 +44,7 @@ class ViewController: UIViewController {
             case .success(let models):
 
                 self?.viewModels = models.compactMap({ model in
-                    //Number Formatter
+
                     let price = model.price_usd ?? 0
                     let formatter = ViewController.numberFormatter
                     let priceString = formatter.string(from: NSNumber(value: price))
